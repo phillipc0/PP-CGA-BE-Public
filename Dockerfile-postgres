@@ -1,0 +1,8 @@
+FROM postgres:13
+
+RUN apt-get update && apt-get install -y postgresql-13-cron && rm -rf /var/lib/apt/lists/*
+
+RUN echo "shared_preload_libraries='pg_cron'" >> /usr/share/postgresql/postgresql.conf.sample
+RUN echo "cron.database_name='app'" >> /usr/share/postgresql/postgresql.conf.sample
+
+USER postgres

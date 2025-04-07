@@ -1,0 +1,47 @@
+services:
+  backend:
+    image: ghcr.io/phillipc0/pp-cga-be:master
+    ports:
+      - "8070:8070"
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql://app:app@db:5432/app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=pp-cga"
+
+  db:
+    image: ghcr.io/phillipc0/pp-cga-db:postgres-13-cron
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=pp-cga"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "app" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.json:/config.json
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=60
+    labels:
+      - "com.centurylinklabs.watchtower.scope=pp-cga"
+
+
+volumes:
+  postgres_data:

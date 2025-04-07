@@ -1,0 +1,6 @@
+__pycache__/
+.venv
+.idea/
+!.idea/codeStyles/
+*.db
+*.sqlite3
